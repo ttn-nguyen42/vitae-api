@@ -2,32 +2,59 @@ package logging
 
 import (
 	"Vitae/config"
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
 )
 
 const (
-	DEBUG   string = "DEBUG"
-	INFO           = "INFO"
-	WARNING        = "WARNING"
-	ERROR          = "ERROR"
-	TRACE          = "TRACE"
-	FATAL          = "FATAL"
-	PANIC          = "PANIC"
+	DEBUG   = "DEBUG"
+	INFO    = "INFO"
+	WARNING = "WARNING"
+	ERROR   = "ERROR"
+	TRACE   = "TRACE"
+	FATAL   = "FATAL"
+	PANIC   = "PANIC"
 )
 
-var DEFAULT = "DEBUG"
+// Default for development mode
+var DEFAULT string
+var logger zerolog.Logger
 
 func init() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	mode := os.Getenv(config.EnvGinMode)
+	if mode != "release" {
+		DEFAULT = DEBUG
+		logger = getConsoleLogger()
+	}
 	if mode == "release" {
 		DEFAULT = INFO
-	} else {
-		DEFAULT = DEBUG
+		logger = getServiceLogger()
 	}
-	zerolog.SetGlobalLevel(getLogLevel())
+}
+
+func getConsoleLogger() zerolog.Logger {
+	writer := zerolog.ConsoleWriter{
+		Out: os.Stderr,
+		FormatLevel: func(i interface{}) string {
+			return strings.ToUpper(fmt.Sprintf("[%s]", i))
+		},
+		FormatCaller: func(i interface{}) string {
+			return fmt.Sprintf("%s", i)
+		},
+		FormatMessage: func(i interface{}) string {
+			return fmt.Sprintf("- %s", i)
+		},
+	}
+	return zerolog.New(writer).Level(getLogLevel()).With().Timestamp().Caller().Logger()
+}
+
+func getServiceLogger() zerolog.Logger {
+	// UNIMPLEMENTED
+	return log.Logger
 }
 
 func getLogLevel() zerolog.Level {
@@ -74,47 +101,47 @@ func logWithMessageAndFields(level *zerolog.Event, message string, fields ...map
 // The debug message is a string
 // Can add additional fields as a map of string
 func Debug(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Debug(), message, additional...)
+	logWithMessageAndFields(logger.Debug(), message, additional...)
 }
 
 // Info prints INFO level logs with timestamp
 // The message is a string
 // Can add additional fields as a map of string
 func Info(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Info(), message, additional...)
+	logWithMessageAndFields(logger.Info(), message, additional...)
 }
 
 // Warning prints WARN level logs with timestamp
 // The message is a string
 // Can add additional fields as a map of string
 func Warning(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Warn(), message, additional...)
+	logWithMessageAndFields(logger.Warn(), message, additional...)
 }
 
 // Error prints ERROR level logs with timestamp
 // The message is a string
 // Can add additional fields as a map of string
 func Error(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Error(), message, additional...)
+	logWithMessageAndFields(logger.Error(), message, additional...)
 }
 
 // Trace prints TRACE level logs with timestamp
 // The message is a string
 // Can add additional fields as a map of string
 func Trace(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Trace(), message, additional...)
+	logWithMessageAndFields(logger.Trace(), message, additional...)
 }
 
 // Fatal prints FATAL level logs with timestamp
 // The message is a string
 // Can add additional fields as a map of string
 func Fatal(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Fatal(), message, additional...)
+	logWithMessageAndFields(logger.Fatal(), message, additional...)
 }
 
 // Panic prints PANIC level logs with timestamp
 // The message is a string
 // Can add additional fields as a map of string
 func Panic(message string, additional ...map[string]interface{}) {
-	logWithMessageAndFields(log.Panic(), message, additional...)
+	logWithMessageAndFields(logger.Panic(), message, additional...)
 }

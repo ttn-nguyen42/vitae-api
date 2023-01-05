@@ -1,11 +1,12 @@
-package about
+package experiences
 
 import (
 	"Vitae/config"
 	"Vitae/repositories"
-	context2 "context"
 
 	"go.mongodb.org/mongo-driver/mongo"
+
+	context2 "context"
 )
 
 type Repository struct {
@@ -15,7 +16,7 @@ type Repository struct {
 
 func New(client *mongo.Client, ctx context2.Context) *Repository {
 	return &Repository{
-		col:     client.Database(config.CVDatabaseName).Collection(repositories.CollectionAbout),
+		col:     client.Database(config.CVDatabaseName).Collection(repositories.CollectionExperiences),
 		context: ctx,
 	}
 }
