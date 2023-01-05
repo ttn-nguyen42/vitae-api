@@ -1,0 +1,1 @@
+mongodb+srv://vitae_admin:Ttng132465@cluster0.ysm0rlx.mongodb.net/?retryWrites=true&w=majority
