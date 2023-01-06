@@ -1,10 +1,14 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Skill struct {
-	Id          string        `bson:"_id"`
-	UserId      string        `bson:"user_id"`
+	Id          primitive.ObjectID        `bson:"_id"`
+	UserId      primitive.ObjectID        `bson:"user_id"`
 	Type        string        `bson:"type" binding:"required"`
 	Name        string        `bson:"name" binding:"required"`
 	Proficiency float32       `bson:"proficiency"`

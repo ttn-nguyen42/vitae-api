@@ -8,7 +8,3 @@ const (
 	EnvMongoClusterID = "MONGO_CLUSTER_ID"
 	EnvGinMode        = "GIN_MODE"
 )
-
-const (
-	CVDatabaseName = "CurriculumVitae"
-)

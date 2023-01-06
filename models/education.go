@@ -1,10 +1,14 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Education struct {
-	Id             string             `bson:"_id"`
-	UserId         string             `bson:"user_id"`
+	Id             primitive.ObjectID             `bson:"_id"`
+	UserId         primitive.ObjectID             `bson:"user_id"`
 	School         string             `bson:"school" binding:"required"`
 	Programme      string             `bson:"programme" binding:"required"`
 	Specialization string             `bson:"specialization"`

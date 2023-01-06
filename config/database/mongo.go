@@ -6,14 +6,14 @@ import (
 	context2 "context"
 	"errors"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var Client *mongo.Client = nil
-var Context = getContext()
 
 func getDriver() (string, error, string) {
 	clusterId := os.Getenv(config.EnvMongoClusterID)
@@ -33,13 +33,14 @@ func getDriver() (string, error, string) {
 	return driver, nil, clusterId
 }
 
-func getContext() context2.Context {
-	context, _ := context2.WithTimeout(context2.Background(), 5*time.Second)
-	return context
+func GetContext() (context2.Context, context2.CancelFunc) {
+	context, cancel := context2.WithTimeout(context2.Background(), 5*time.Second)
+	return context, cancel
 }
 
 func Connect() *mongo.Client {
 	driver, err, databaseId := getDriver()
+	context, cancel := GetContext()
 	if err != nil {
 		logging.Fatal(err.Error())
 	}
@@ -47,11 +48,12 @@ func Connect() *mongo.Client {
 	if err != nil {
 		logging.Fatal(err.Error())
 	}
-	err = client.Connect(Context)
+	err = client.Connect(context)
+	defer cancel()
 	if err != nil {
 		logging.Fatal(err.Error())
 	}
-	err = client.Ping(Context, nil)
+	err = client.Ping(context, nil)
 	if err != nil {
 		logging.Fatal(err.Error())
 	}
@@ -63,8 +65,10 @@ func Connect() *mongo.Client {
 }
 
 func Close() {
+	context, cancel := GetContext()
+	defer cancel()
 	if Client != nil {
-		err := Client.Disconnect(Context)
+		err := Client.Disconnect(context)
 		if err != nil {
 			logging.Fatal(err.Error())
 		}

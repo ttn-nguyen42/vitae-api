@@ -10,3 +10,13 @@ const (
 	CollectionActivities     = "userActivity"
 	CollectionCertificates   = "userCertificate"
 )
+
+const (
+	CVDatabaseName = "CurriculumVitae"
+)
+
+const (
+	QueryAll = -1
+	Query10 = 10
+	QueryDefault = Query10
+)

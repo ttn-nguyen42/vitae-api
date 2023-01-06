@@ -1,7 +1,6 @@
 package skills
 
 import (
-	"Vitae/config"
 	"Vitae/repositories"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,7 +12,7 @@ type Repository struct {
 
 func New(client *mongo.Client) *Repository {
 	return &Repository{
-		col:     client.Database(config.CVDatabaseName).Collection(repositories.CollectionSkills),
+		col:     client.Database(repositories.CVDatabaseName).Collection(repositories.CollectionSkills),
 	}
 }
 
