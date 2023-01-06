@@ -3,20 +3,22 @@ package models
 import "time"
 
 type Education struct {
-	School         string             `json:"school" binding:"required"`
-	Programme      string             `json:"programme" binding:"required"`
-	Specialization string             `json:"specialization"`
-	From           time.Time          `json:"from" binding:"required"`
-	To             time.Time          `json:"to" binding:"required"`
-	AverageScore   float32            `json:"averageScore" binding:"alphanum,gte=0,lte=10"`
-	Description    []Description      `json:"description"`
-	Courses        []EducationCourses `json:"courses"`
-	Url            []Url              `json:"url"`
-	City           string             `json:"address" binding:"required"`
-	Country        string             `json:"country" binding:"required"`
+	Id             string             `bson:"_id"`
+	UserId         string             `bson:"user_id"`
+	School         string             `bson:"school" binding:"required"`
+	Programme      string             `bson:"programme" binding:"required"`
+	Specialization string             `bson:"specialization"`
+	From           time.Time          `bson:"from" binding:"required"`
+	To             time.Time          `bson:"to" binding:"required"`
+	AverageScore   float32            `bson:"average_score" binding:"alphanum,gte=0,lte=10"`
+	Description    []Description      `bson:"description"`
+	Courses        []EducationCourses `bson:"courses"`
+	Url            []Url              `bson:"url"`
+	City           string             `bson:"address" binding:"required"`
+	Country        string             `bson:"country" binding:"required"`
 }
 
 type EducationCourses struct {
-	Name  string `json:"name" binding:"required"`
-	Grade string `json:"grade"`
+	Name  string `bson:"name" binding:"required"`
+	Grade string `bson:"grade"`
 }

@@ -5,19 +5,15 @@ import (
 	"Vitae/repositories"
 
 	"go.mongodb.org/mongo-driver/mongo"
-
-	context2 "context"
 )
 
 type Repository struct {
 	col     *mongo.Collection
-	context context2.Context
 }
 
-func New(client *mongo.Client, ctx context2.Context) *Repository {
+func New(client *mongo.Client) *Repository {
 	return &Repository{
 		col:     client.Database(config.CVDatabaseName).Collection(repositories.CollectionActivities),
-		context: ctx,
 	}
 }
 

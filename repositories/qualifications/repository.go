@@ -14,10 +14,9 @@ type Repository struct {
 	context context2.Context
 }
 
-func New(client *mongo.Client, ctx context2.Context) *Repository {
+func New(client *mongo.Client) *Repository {
 	return &Repository{
 		col:     client.Database(config.CVDatabaseName).Collection(repositories.CollectionQualifications),
-		context: ctx,
 	}
 }
 

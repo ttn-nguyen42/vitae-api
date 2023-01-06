@@ -1,9 +1,11 @@
 package models
 
 type SocialMedia struct {
-	Platform     string `json:"platform" binding:"required"`
-	User         string `json:"user" binding:"required"`
-	Url          Url    `json:"url" binding:"required"`
-	ColoredIcon  Url    `json:"coloredIcon"`
-	MonotoneIcon Url    `json:"monotoneIcon"`
+	Id           string `bson:"_id"`
+	UserId       string `bson:"user_id"`
+	Platform     string `bson:"platform" binding:"required"`
+	User         string `bson:"user" binding:"required"`
+	Url          Url    `bson:"url" binding:"required"`
+	ColoredIcon  Url    `bson:"colored_icon"`
+	MonotoneIcon Url    `bson:"monotone_icon"`
 }

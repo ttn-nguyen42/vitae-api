@@ -9,6 +9,6 @@ import (
 )
 
 func Get(c *gin.Context) {
-	_ = education.New(database.Client, database.Context)
+	_ = education.New(database.Client)
 	c.JSON(http.StatusOK, nil)
 }
