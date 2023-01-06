@@ -10,7 +10,7 @@ func IsProduction() bool {
 	if mode == "" {
 		return false
 	}
-	if mode != "production" {
+	if mode != "release" {
 		return false
 	}
 	return true

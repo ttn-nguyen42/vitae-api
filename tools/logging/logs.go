@@ -2,6 +2,7 @@ package logging
 
 import (
 	"Vitae/config"
+	"Vitae/tools/utils"
 	"fmt"
 	"os"
 	"strings"
@@ -25,11 +26,13 @@ var DEFAULT string
 var logger zerolog.Logger
 
 func init() {
-	mode := os.Getenv(config.EnvGinMode)
-	if mode == "release" {
+	setup()
+}
+
+func setup() {
+	if utils.IsProduction() {
 		DEFAULT = INFO
-		zerolog.SetGlobalLevel(getLogLevel(DEFAULT))
-		logger = getServiceLogger()
+		logger = getServiceLogger(getLogLevel(DEFAULT))
 		return
 	}
 
@@ -38,7 +41,7 @@ func init() {
 	if level == "" {
 		level = DEFAULT
 	}
- 	logger = getConsoleLogger(getLogLevel(level))
+	logger = getConsoleLogger(getLogLevel(level))
 }
 
 func getConsoleLogger(level zerolog.Level) zerolog.Logger {
@@ -63,9 +66,9 @@ func getConsoleLogger(level zerolog.Level) zerolog.Logger {
 	return zerolog.New(writer).Level(level).With().Timestamp().Caller().Logger()
 }
 
-func getServiceLogger() zerolog.Logger {
+func getServiceLogger(level zerolog.Level) zerolog.Logger {
 	// UNIMPLEMENTED
-	return log.Logger
+	return log.Logger.Level(level)
 }
 
 func getLogLevel(level string) zerolog.Level {
