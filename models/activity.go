@@ -7,8 +7,8 @@ import (
 )
 
 type Activity struct {
-	Id          primitive.ObjectID `bson:"_id"`
-	UserId      primitive.ObjectID             `bson:"user_id"`
+	Id          primitive.ObjectID `bson:"_id,omitempty" copier:"-"`
+	UserId      primitive.ObjectID `bson:"user_id"`
 	Role        string             `bson:"role" binding:"required"`
 	Organizer   string             `bson:"organizer" binding:"required"`
 	From        time.Time          `bson:"from" binding:"required"`

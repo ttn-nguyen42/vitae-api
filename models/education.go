@@ -7,8 +7,8 @@ import (
 )
 
 type Education struct {
-	Id             primitive.ObjectID             `bson:"_id"`
-	UserId         primitive.ObjectID             `bson:"user_id"`
+	Id             primitive.ObjectID `bson:"_id,omitempty" copier:"-"`
+	UserId         primitive.ObjectID `bson:"user_id"`
 	School         string             `bson:"school" binding:"required"`
 	Programme      string             `bson:"programme" binding:"required"`
 	Specialization string             `bson:"specialization"`

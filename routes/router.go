@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"Vitae/config/database"
+	aboutRepository "Vitae/repositories/about"
 	"Vitae/routes/v1/about"
 	"Vitae/routes/v1/activities"
 	"Vitae/routes/v1/certificates"
@@ -21,7 +23,19 @@ func Create(engine *gin.Engine) {
 
 	v1 := engine.Group("/api/v1")
 
-	v1.GET("/about", about.Get)
+	// MongoDB client
+	client := database.Client
+
+	// Repositories
+	aboutRepo := aboutRepository.New(client)
+
+	// Services
+	aboutService := about.NewService(aboutRepo)
+
+	v1.GET("/about", about.GetAll(aboutService))
+	v1.GET("/about/:id", about.GetOne(aboutService))
+	v1.POST("/about", about.Post(aboutService))
+	
 	v1.GET("/activities", activities.Get)
 	v1.GET("/certificates", certificates.Get)
 	v1.GET("/education", education.Get)

@@ -37,3 +37,22 @@ func NewNotFoundError(message string) error {
 		message: message,
 	}
 }
+
+// Error returned when a user supplied ID is correctly formatted
+// Implements the "error" interface
+type InvalidIdError struct {
+	message string
+}
+
+func (e *InvalidIdError) Error() string {
+	if e.message == "" {
+		return "invalid supplied ID"
+	}
+	return e.message
+}
+
+func NewInvalidIdError(message string) error {
+	return &InvalidIdError{
+		message: message,
+	}
+}

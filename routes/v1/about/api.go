@@ -1,14 +1,119 @@
 package about
 
 import (
-	"Vitae/config/database"
-	"Vitae/repositories/about"
+	"Vitae/repositories"
+	v1 "Vitae/routes/v1"
+	"Vitae/tools/logging"
+	"Vitae/tools/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Get(c *gin.Context) {
-	_ = about.New(database.Client)
-	c.JSON(http.StatusOK, nil)
+// Get one 'about', equivalent to an user
+// Requires QUERY id=string
+func GetOne(service IService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, ok := c.Params.Get("id")
+		if !ok {
+			c.JSON(http.StatusBadRequest, v1.MessageResponse{
+				Message: "Missing user ID as parameter",
+			})
+			return
+		}
+		var dto GetResponse
+		err := service.GetOne(&dto, id)
+		if _, ok = err.(*repositories.NotFoundError); ok {
+			logging.Debug(err.Error())
+			c.JSON(http.StatusNotFound, v1.MessageResponse{
+				Message: http.StatusText(http.StatusNotFound),
+			})
+			return
+		}
+		if _, ok = err.(*repositories.InvalidIdError); ok {
+			logging.Debug(err.Error())
+			c.JSON(http.StatusBadRequest, v1.MessageResponse{
+				Message: "Invalid ID format",
+			})
+		}
+		if err != nil {
+			logging.Debug(err.Error())
+			c.JSON(http.StatusInternalServerError, v1.MessageResponse{
+				Message: http.StatusText(http.StatusInternalServerError),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, dto)
+	}
+}
+
+// Get all 'about's, equivalent to getting all users
+// Requires QUERY amount=int
+// ADMIN feature
+func GetAll(service IService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		query, ok := c.GetQuery("amount")
+		var amount int
+		var err error
+		if !ok || amount <= 0 {
+			amount = repositories.Query10
+		}
+		if ok {
+			amount, err = strconv.Atoi(query)
+		}
+		logging.Trace("Amount in query", map[string]interface{}{"amount": amount})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, v1.MessageResponse{
+				Message: "Incorrect query type for 'amount'",
+			})
+			return
+		}
+		dtos, err := service.GetAll(amount)
+		logging.Trace("DTOs in controller layer", map[string]interface{}{"length": len(dtos)})
+		if err != nil {
+			logging.Debug(err.Error())
+			c.JSON(http.StatusInternalServerError, v1.MessageResponse{
+				Message: http.StatusText(http.StatusInternalServerError),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, dtos)
+	}
+}
+
+// Add an 'about', equivalent to add an user profile
+// Requires a DTO
+// Returns an ID of the newly created user
+// ADMIN feature
+func Post(service IService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var dto PostRequest
+		err := c.BindJSON(&dto)
+		if err != nil {
+			if !utils.IsProduction() {
+				c.JSON(http.StatusBadRequest, err)
+				return
+			}
+			c.JSON(http.StatusBadRequest, v1.MessageResponse{
+				Message: http.StatusText(http.StatusBadRequest),
+			})
+			return
+		}
+		logging.Trace("Post body", map[string]interface{}{"dto": dto})
+		id, err := service.AddOne(dto)
+		logging.Trace("Database result at handler level", map[string]interface{}{
+			"id": id,
+		})
+		if err != nil {
+			logging.Debug(err.Error())
+			c.JSON(http.StatusInternalServerError, v1.MessageResponse{
+				Message: http.StatusText(http.StatusInternalServerError),
+			})
+			return
+		}
+		c.JSON(http.StatusCreated, v1.IdResponse{
+			Id: id,
+		})
+	}
 }

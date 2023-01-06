@@ -7,7 +7,7 @@ import (
 )
 
 type About struct {
-	Id         primitive.ObjectID `bson:"_id"`
+	Id         primitive.ObjectID `bson:"_id,omitempty" copier:"-"`
 	FirstName  string             `bson:"first_name" binding:"required"`
 	LastName   string             `bson:"last_name" binding:"required"`
 	Email      string             `bson:"email" binding:"required,email"`

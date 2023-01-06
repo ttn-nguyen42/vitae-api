@@ -26,17 +26,22 @@ var logger zerolog.Logger
 
 func init() {
 	mode := os.Getenv(config.EnvGinMode)
-	if mode != "release" {
-		DEFAULT = DEBUG
-		logger = getConsoleLogger()
-	}
 	if mode == "release" {
 		DEFAULT = INFO
+		zerolog.SetGlobalLevel(getLogLevel(DEFAULT))
 		logger = getServiceLogger()
+		return
 	}
+
+	DEFAULT = DEBUG
+	level := os.Getenv(config.EnvLogLevel)
+	if level == "" {
+		level = DEFAULT
+	}
+ 	logger = getConsoleLogger(getLogLevel(level))
 }
 
-func getConsoleLogger() zerolog.Logger {
+func getConsoleLogger(level zerolog.Level) zerolog.Logger {
 	writer := zerolog.ConsoleWriter{
 		Out: os.Stderr,
 		FormatLevel: func(i interface{}) string {
@@ -45,11 +50,17 @@ func getConsoleLogger() zerolog.Logger {
 		FormatCaller: func(i interface{}) string {
 			return fmt.Sprintf("%s", i)
 		},
+		FormatFieldName: func(i interface{}) string {
+			return fmt.Sprintf("| %s: ", i)
+		},
+		FormatFieldValue: func(i interface{}) string {
+			return fmt.Sprintf("%s", i)
+		},
 		FormatMessage: func(i interface{}) string {
 			return fmt.Sprintf("- %s", i)
 		},
 	}
-	return zerolog.New(writer).Level(getLogLevel()).With().Timestamp().Caller().Logger()
+	return zerolog.New(writer).Level(level).With().Timestamp().Caller().Logger()
 }
 
 func getServiceLogger() zerolog.Logger {
@@ -57,11 +68,7 @@ func getServiceLogger() zerolog.Logger {
 	return log.Logger
 }
 
-func getLogLevel() zerolog.Level {
-	level := os.Getenv(config.EnvLogLevel)
-	if len(level) == 0 {
-		level = DEFAULT
-	}
+func getLogLevel(level string) zerolog.Level {
 	switch level {
 	case DEBUG:
 		return zerolog.DebugLevel
@@ -91,7 +98,7 @@ func logWithMessageAndFields(level *zerolog.Event, message string, fields ...map
 		return
 	}
 	if fields != nil {
-		withOption(level).Fields(fields).Msg(message)
+		withOption(level).Fields(fields[0]).Msg(message)
 	} else {
 		withOption(level).Msg(message)
 	}
