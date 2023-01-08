@@ -39,7 +39,7 @@ func (repo *Repository) GetAll(queryAmount int) ([]models.About, error) {
 	if err != nil {
 		return nil, err
 	}
-	if (queryAmount == repositories.QueryAll) {
+	if (queryAmount <= repositories.QueryAll) {
 		err := cursor.All(context, &results)
 		if err != nil {
 			return nil, repositories.NewInternalError(err.Error())
