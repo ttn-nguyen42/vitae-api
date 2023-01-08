@@ -21,6 +21,7 @@ type aboutRepositoryMock struct {
 	// Fake methods
 	FakeAddOne func(document models.About) (string, error)
 	FakeGetOne func(result *models.About, id string) error
+	FakeGetAll func(queryAmount int) ([]models.About, error)
 }
 
 func (m *aboutRepositoryMock) AddOne(document models.About) (string, error) {
@@ -29,6 +30,151 @@ func (m *aboutRepositoryMock) AddOne(document models.About) (string, error) {
 
 func (m *aboutRepositoryMock) GetOne(dto *models.About, id string) error {
 	return m.FakeGetOne(dto, id)
+}
+
+func (m *aboutRepositoryMock) GetAll(queryAmount int) ([]models.About, error) {
+	return m.FakeGetAll(queryAmount)
+}
+
+func TestGetAll_WillGetAllWhenNoAmountSpecified(t *testing.T) {
+	testAmount := repositories.QueryAll
+	testEntities := []models.About{
+		{FirstName: "Nguyen", LastName: "Tran"},
+		{FirstName: "Andrew", LastName: "Tran"},
+		{FirstName: "John", LastName: "Doe"},
+		{FirstName: "Jack", LastName: "The Reaper"},
+	}
+	mockRepository := aboutRepositoryMock{
+		FakeGetAll: func(queryAmount int) ([]models.About, error) {
+			return testEntities, nil
+		},
+	}
+	service := NewService(&mockRepository)
+
+	gotData, gotErr := service.GetAll(testAmount)
+
+	if gotErr != nil {
+		t.Errorf("Expected no error, got %v", gotErr.Error())
+	}
+	if len(gotData) == 0 {
+		t.Errorf("Expected %v data, got none", len(testEntities))
+	}
+	if len(testEntities) != len(gotData) {
+		t.Errorf("Expect %v data, got %v", len(testEntities), len(gotData))
+	}
+	for at, data := range gotData {
+		if data.FirstName != testEntities[at].FirstName {
+			t.Errorf("Expected at %v, FirstName be %v, got %v", at, testEntities[at].FirstName, data.FirstName)
+		}
+	}
+}
+
+func TestGetAll_WillGetCorrectAmountWhenSpecified(t *testing.T) {
+	testAmount := 3
+	testEntities := []models.About{
+		{FirstName: "Nguyen", LastName: "Tran"},
+		{FirstName: "Andrew", LastName: "Tran"},
+		{FirstName: "John", LastName: "Doe"},
+		{FirstName: "Jack", LastName: "The Reaper"},
+	}
+	mockRepository := aboutRepositoryMock{
+		FakeGetAll: func(queryAmount int) ([]models.About, error) {
+			return testEntities[0:3], nil
+		},
+	}
+	service := NewService(&mockRepository)
+
+	gotData, gotErr := service.GetAll(testAmount)
+
+	if gotErr != nil {
+		t.Errorf("Expected no error, got %v", gotErr.Error())
+	}
+	if len(gotData) == 0 {
+		t.Errorf("Expected %v data, got none", len(testEntities))
+	}
+	if testAmount != len(gotData) {
+		t.Errorf("Expect %v data, got %v", testAmount, len(gotData))
+	}
+	for at, data := range gotData {
+		if data.FirstName != testEntities[at].FirstName {
+			t.Errorf("Expected at %v, FirstName be %v, got %v", at, testEntities[at].FirstName, data.FirstName)
+		}
+	}
+}
+
+func TestGetAll_WillGetAllWhenAmountIsGreaterThanLength(t *testing.T) {
+	testAmount := 5
+	testEntities := []models.About{
+		{FirstName: "Nguyen", LastName: "Tran"},
+		{FirstName: "Andrew", LastName: "Tran"},
+		{FirstName: "John", LastName: "Doe"},
+		{FirstName: "Jack", LastName: "The Reaper"},
+	}
+	mockRepository := aboutRepositoryMock{
+		FakeGetAll: func(queryAmount int) ([]models.About, error) {
+			return testEntities, nil
+		},
+	}
+	service := NewService(&mockRepository)
+
+	gotData, gotErr := service.GetAll(testAmount)
+
+	if gotErr != nil {
+		t.Errorf("Expected no error, got %v", gotErr.Error())
+	}
+	if len(gotData) == 0 {
+		t.Errorf("Expected %v data, got none", len(testEntities))
+	}
+	if testAmount < len(gotData) {
+		t.Errorf("Expect %v data, got %v", testAmount, len(gotData))
+	}
+	for at, data := range gotData {
+		if data.FirstName != testEntities[at].FirstName {
+			t.Errorf("Expected at %v, FirstName be %v, got %v", at, testEntities[at].FirstName, data.FirstName)
+		}
+	}
+}
+
+func TestGetAll_BreaksWhenDatabaseIsBroken(t *testing.T) {
+	testAmount := repositories.QueryAll
+	testMessage := "Database is broken"
+	mockRepository := aboutRepositoryMock{
+		FakeGetAll: func(queryAmount int) ([]models.About, error) {
+			return []models.About{}, repositories.NewInternalError(testMessage)
+		},
+	}
+	service := NewService(&mockRepository)
+
+	gotData, gotErr := service.GetAll(testAmount)
+
+	if gotErr == nil {
+		t.Errorf("Expected error, got none")
+	}
+	if gotErr.Error() != testMessage {
+		t.Errorf("Expected error %v, got %v", testMessage, gotErr.Error())
+	}
+	if len(gotData) != 0 {
+		t.Errorf("Expected 0 data, got %v of it", len(gotData))
+	}
+}
+
+func TestGetAll_WillReturnsEmptyWhenCollectionEmpty(t *testing.T) {
+	testAmount := repositories.QueryAll
+	mockRepository := aboutRepositoryMock{
+		FakeGetAll: func(queryAmount int) ([]models.About, error) {
+			return []models.About{}, nil
+		},
+	}
+	service := NewService(&mockRepository)
+
+	gotData, gotErr := service.GetAll(testAmount)
+
+	if gotErr != nil {
+		t.Errorf("Expected no error, got %v", gotErr.Error())
+	}
+	if len(gotData) != 0 {
+		t.Errorf("Expected 0 data, got %v of it", len(gotData))
+	}
 }
 
 func TestGetOne_WillGetOneWhenGivenCorrectId(t *testing.T) {
