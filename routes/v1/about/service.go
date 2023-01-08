@@ -8,10 +8,18 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-type IService interface {
-	AddOne(dto PostRequest) (string, error)
+type IReader interface {
 	GetOne(dto *GetResponse, id string) error
 	GetAll(amount int) ([]GetResponse, error)
+}
+
+type IWriter interface {
+	AddOne(dto PostRequest) (string, error)
+}
+
+type IService interface {
+	IReader
+	IWriter
 }
 
 type Service struct {

@@ -13,7 +13,7 @@ import (
 
 // Get one 'about', equivalent to an user
 // Requires QUERY id=string
-func GetOne(service IService) gin.HandlerFunc {
+func GetOne(service IReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, ok := c.Params.Get("id")
 		if !ok {
@@ -51,7 +51,7 @@ func GetOne(service IService) gin.HandlerFunc {
 // Get all 'about's, equivalent to getting all users
 // Requires QUERY amount=int
 // ADMIN feature
-func GetAll(service IService) gin.HandlerFunc {
+func GetAll(service IReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		query, ok := c.GetQuery("amount")
 		var amount int
@@ -86,7 +86,7 @@ func GetAll(service IService) gin.HandlerFunc {
 // Requires a DTO
 // Returns an ID of the newly created user
 // ADMIN feature
-func Post(service IService) gin.HandlerFunc {
+func Post(service IWriter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var dto PostRequest
 		err := c.BindJSON(&dto)
