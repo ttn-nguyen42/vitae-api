@@ -4,7 +4,6 @@ import (
 	"Vitae/repositories"
 	v1 "Vitae/routes/v1"
 	"Vitae/tools/logging"
-	"Vitae/tools/utils"
 	"net/http"
 	"strconv"
 
@@ -16,7 +15,7 @@ import (
 func GetOne(service IReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, ok := c.Params.Get("id")
-		if !ok {
+		if !ok || len(id) == 0 {
 			c.JSON(http.StatusBadRequest, v1.MessageResponse{
 				Message: "Missing user ID as parameter",
 			})
@@ -36,6 +35,7 @@ func GetOne(service IReader) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, v1.MessageResponse{
 				Message: "Invalid ID format",
 			})
+			return
 		}
 		if err != nil {
 			logging.Debug(err.Error())
@@ -91,10 +91,6 @@ func Post(service IWriter) gin.HandlerFunc {
 		var dto PostRequest
 		err := c.BindJSON(&dto)
 		if err != nil {
-			if !utils.IsProduction() {
-				c.JSON(http.StatusBadRequest, err)
-				return
-			}
 			c.JSON(http.StatusBadRequest, v1.MessageResponse{
 				Message: http.StatusText(http.StatusBadRequest),
 			})

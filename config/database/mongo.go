@@ -15,22 +15,22 @@ import (
 
 var Client *mongo.Client = nil
 
-func getDriver() (string, error, string) {
+func getDriver() (string, string, error) {
 	clusterId := os.Getenv(config.EnvMongoClusterID)
 	if clusterId == "" {
-		return "", errors.New("missing MongoDB cluster ID"), ""
+		return "", "", errors.New("missing MongoDB cluster ID")
 	}
 	username := os.Getenv(config.EnvMongoUsername)
 	if username == "" {
-		return "", errors.New("missing MongoDB username"), clusterId
+		return "", "", errors.New("missing MongoDB username")
 	}
 	password := os.Getenv(config.EnvMongoPassword)
 	if password == "" {
-		return "", errors.New("missing MongoDB password"), clusterId
+		return "", "", errors.New("missing MongoDB password")
 	}
 	settings := "?retryWrites=true&w=majority"
 	driver := fmt.Sprintf("mongodb+srv://%v:%v@%v.mongodb.net/%v", username, password, clusterId, settings)
-	return driver, nil, clusterId
+	return driver, clusterId, nil
 }
 
 func GetContext() (context2.Context, context2.CancelFunc) {
@@ -39,7 +39,7 @@ func GetContext() (context2.Context, context2.CancelFunc) {
 }
 
 func Connect() *mongo.Client {
-	driver, err, databaseId := getDriver()
+	driver, databaseId, err := getDriver()
 	context, cancel := GetContext()
 	if err != nil {
 		logging.Fatal(err.Error())
