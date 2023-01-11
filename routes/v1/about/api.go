@@ -23,21 +23,7 @@ func GetOne(service IReader) gin.HandlerFunc {
 		}
 		var dto GetResponse
 		err := service.GetOne(&dto, id)
-		if _, ok = err.(*repositories.NotFoundError); ok {
-			logging.Debug(err.Error())
-			c.JSON(http.StatusNotFound, v1.MessageResponse{
-				Message: http.StatusText(http.StatusNotFound),
-			})
-			return
-		}
-		if _, ok = err.(*repositories.InvalidIdError); ok {
-			logging.Debug(err.Error())
-			c.JSON(http.StatusBadRequest, v1.MessageResponse{
-				Message: "Invalid ID format",
-			})
-			return
-		}
-		if err != nil {
+if err != nil {
 			logging.Debug(err.Error())
 			c.JSON(http.StatusInternalServerError, v1.MessageResponse{
 				Message: http.StatusText(http.StatusInternalServerError),

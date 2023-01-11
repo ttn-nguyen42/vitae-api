@@ -1,20 +1,23 @@
-package about
+package activities
 
 import (
 	"Vitae/models"
+	"Vitae/repositories"
 	"Vitae/repositories/about"
+	"Vitae/repositories/activities"
 	"Vitae/tools/logging"
 
 	"github.com/jinzhu/copier"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type IReader interface {
 	GetOne(dto *GetResponse, id string) error
-	GetAll(amount int) ([]GetResponse, error)
+	GetAll(userId string, amount int) ([]GetResponse, error)
 }
 
 type IWriter interface {
-	AddOne(dto PostRequest) (string, error)
+	AddOne(userId string, dto PostRequest) (string, error)
 }
 
 type IService interface {
@@ -23,19 +26,33 @@ type IService interface {
 }
 
 type Service struct {
-	repo about.IRepository
+	repo     activities.IRepository
+	userRepo about.IRepository
 }
 
-func NewService(repo about.IRepository) *Service {
+func NewService(userRepo about.IRepository, activitiesRepo activities.IRepository) *Service {
 	return &Service{
-		repo: repo,
+		repo:     activitiesRepo,
+		userRepo: userRepo,
 	}
 }
 
-func (s *Service) AddOne(dto PostRequest) (string, error) {
-	var entity models.About
+func (s *Service) AddOne(userId string, dto PostRequest) (string, error) {
+	ok, err := s.userRepo.Exists(userId)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", repositories.NewNotFoundError("User Id is incorrect")
+	}
+	parsedId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return "", repositories.NewInvalidIdError("User Id is not correctly format")
+	}
+	var entity models.Activity
 	logging.Trace("DTO at service layer", map[string]interface{}{"dto": dto})
 	copier.Copy(&entity, &dto)
+	entity.UserId = parsedId
 	logging.Trace("Entity at service layer", map[string]interface{}{"entity": entity})
 	id, err := s.repo.AddOne(entity)
 	logging.Trace("ID received at service layer", map[string]interface{}{"id": id})
@@ -46,7 +63,7 @@ func (s *Service) AddOne(dto PostRequest) (string, error) {
 }
 
 func (s *Service) GetOne(dto *GetResponse, id string) error {
-	var entity models.About
+	var entity models.Activity
 	logging.Trace("ID at service layer", map[string]interface{}{"id": id})
 	err := s.repo.GetOne(&entity, id)
 	logging.Trace("Entity at service layer", map[string]interface{}{"entity": entity})
@@ -61,10 +78,17 @@ func (s *Service) GetOne(dto *GetResponse, id string) error {
 	return nil
 }
 
-func (s *Service) GetAll(amount int) ([]GetResponse, error) {
+func (s *Service) GetAll(userId string, amount int) ([]GetResponse, error) {
+	ok, err := s.userRepo.Exists(userId)
+	if err != nil {
+		return []GetResponse{}, err
+	}
+	if !ok {
+		return []GetResponse{}, repositories.NewNotFoundError("User Id is incorrect")
+	}
 	var dtos []GetResponse
 	logging.Trace("Amount received in service layer", map[string]interface{}{"amount": amount})
-	entities, err := s.repo.GetAll(amount)
+	entities, err := s.repo.GetAll(userId, amount)
 	if err != nil {
 		return nil, err
 	}

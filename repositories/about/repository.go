@@ -17,6 +17,7 @@ type IRepository interface {
 	GetOne(result *models.About, id string) error
 	AddOne(document models.About) (string, error)
 	UpdateOne(document models.About) (error)
+	Exists(id string) (bool, error)
 }
 
 type Repository struct {
@@ -104,4 +105,25 @@ func (repo *Repository) AddOne(document models.About) (string, error) {
 
 func (repo *Repository) UpdateOne(document models.About) error {
 	return nil
+}
+
+func (repo *Repository) Exists(id string) (bool, error) {
+	context, cancel := database.GetContext()
+	defer cancel()
+	logging.Trace("Checking if ID exists", map[string]interface{}{"requested_id": id})
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return false, repositories.NewInvalidIdError("ID is invalid")
+	}
+	filter := bson.D{
+		{Key: "_id", Value: objectId},
+	}
+	err = repo.col.FindOne(context, filter).Err()
+	if err == mongo.ErrNoDocuments {
+		return false, repositories.NewNotFoundError("ID not found")
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, err
 }

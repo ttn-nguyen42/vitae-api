@@ -3,6 +3,7 @@ package routes
 import (
 	"Vitae/config/database"
 	aboutRepository "Vitae/repositories/about"
+	activitiesRepo "Vitae/repositories/activities"
 	"Vitae/routes/v1/about"
 	"Vitae/routes/v1/activities"
 	"Vitae/routes/v1/certificates"
@@ -28,15 +29,20 @@ func Create(engine *gin.Engine) {
 
 	// Repositories
 	aboutRepo := aboutRepository.New(client)
+	activitiesRepo := activitiesRepo.New(client)
 
 	// Services
 	aboutService := about.NewService(aboutRepo)
+	activitiesService := activities.NewService(aboutRepo, activitiesRepo)
 
 	v1.GET("/about", about.GetAll(aboutService))
 	v1.GET("/about/:id", about.GetOne(aboutService))
 	v1.POST("/about", about.Post(aboutService))
 	
-	v1.GET("/activities", activities.Get)
+	v1.GET("/users/:id/activities", activities.GetAll(activitiesService))
+	v1.GET("/activities/:activityId", activities.GetOne(activitiesService))
+	v1.POST("/users/:id/activities", activities.Post(activitiesService))
+
 	v1.GET("/certificates", certificates.Get)
 	v1.GET("/education", education.Get)
 	v1.GET("/experiences", experiences.Get)
