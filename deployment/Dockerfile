@@ -2,13 +2,13 @@ FROM golang:1.19.4
 WORKDIR /go/src/Vitae/
 RUN go mod init
 RUN go mod tidy
-COPY . /go/src/Vitae/
+COPY ../ /go/src/Vitae/
 RUN CGO_ENABLED=0 go build -a -o server .
 
 FROM alpine:latest
 
 ENV GIN_MODE=debug
-ENV PORT=
+ENV PORT=3000
 ENV LOG_LEVEL=
 ENV MONGO_USERNAME=
 ENV MONGO_PASSWORD=
