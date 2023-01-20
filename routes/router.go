@@ -2,7 +2,7 @@ package routes
 
 import (
 	"Vitae/config/database"
-	aboutRepository "Vitae/repositories/about"
+	aboutRepo "Vitae/repositories/about"
 	activitiesRepo "Vitae/repositories/activities"
 	"Vitae/routes/v1/about"
 	"Vitae/routes/v1/activities"
@@ -28,7 +28,7 @@ func Create(engine *gin.Engine) {
 	client := database.Client
 
 	// Repositories
-	aboutRepo := aboutRepository.New(client)
+	aboutRepo := aboutRepo.New(client)
 	activitiesRepo := activitiesRepo.New(client)
 
 	// Services
