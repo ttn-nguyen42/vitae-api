@@ -1,3 +1,6 @@
 .idea
 .vscode
+.env
 .gitignore
+Dockerfile
+ec2-bootstrap.sh

@@ -2,7 +2,7 @@ package certificates
 
 import (
 	"Vitae/repositories"
-
+    "Vitae/tools/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -12,7 +12,7 @@ type Repository struct {
 
 func New(client *mongo.Client) *Repository {
 	return &Repository{
-		col:     client.Database(repositories.CVDatabaseName).Collection(repositories.CollectionCertificates),
+		col:     client.Database(utils.GetDatabaseName(repositories.CVDatabaseName)).Collection(repositories.CollectionCertificates),
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"Vitae/models"
 	"Vitae/repositories"
 	"Vitae/tools/logging"
+	"Vitae/tools/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -26,7 +27,7 @@ type Repository struct {
 
 func New(client *mongo.Client) *Repository {
 	return &Repository{
-		col:     client.Database(repositories.CVDatabaseName).Collection(repositories.CollectionAbout),
+		col:     client.Database(utils.GetDatabaseName(repositories.CVDatabaseName)).Collection(repositories.CollectionAbout),
 	}
 }
 

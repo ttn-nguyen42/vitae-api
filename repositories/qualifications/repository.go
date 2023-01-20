@@ -3,7 +3,8 @@ package qualifications
 import (
 	"Vitae/repositories"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	 "Vitae/tools/utils"
+     "go.mongodb.org/mongo-driver/mongo"
 
 	context2 "context"
 )
@@ -15,7 +16,7 @@ type Repository struct {
 
 func New(client *mongo.Client) *Repository {
 	return &Repository{
-		col:     client.Database(repositories.CVDatabaseName).Collection(repositories.CollectionQualifications),
+		col:     client.Database(utils.GetDatabaseName(repositories.CVDatabaseName)).Collection(repositories.CollectionQualifications),
 	}
 }
 

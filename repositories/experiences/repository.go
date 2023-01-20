@@ -3,7 +3,8 @@ package experiences
 import (
 	"Vitae/repositories"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	 "Vitae/tools/utils"
+     "go.mongodb.org/mongo-driver/mongo"
 )
 
 type Repository struct {
@@ -12,7 +13,7 @@ type Repository struct {
 
 func New(client *mongo.Client) *Repository {
 	return &Repository{
-		col:     client.Database(repositories.CVDatabaseName).Collection(repositories.CollectionExperiences),
+		col:     client.Database(utils.GetDatabaseName(repositories.CVDatabaseName)).Collection(repositories.CollectionExperiences),
 	}
 }
 

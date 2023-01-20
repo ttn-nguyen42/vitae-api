@@ -54,6 +54,7 @@ func (s *Service) GetOne(dto *GetResponse, id string) error {
 		return err
 	}
 	err = copier.Copy(dto, &entity)
+    dto.Id = id
 	if err != nil {
 		return err
 	}

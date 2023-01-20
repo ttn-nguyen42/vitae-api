@@ -1,0 +1,13 @@
+version: "3.3"
+services:
+  api_server:
+    image: ${DOCKERHUB_IMAGE_NAME}
+    ports:
+      - ${API_PORT}:${API_PORT}
+    environment:
+      - GIN_MODE=release
+      - PORT=${API_PORT}
+      - MONGO_USERNAME=${MONGODB_USERNAME}
+      - MONGO_PASSWORD=${MONGODB_PASSWORD}
+      - MONGO_CLUSTER_ID=${MONGODB_DATABASE}
+    restart: "always"
